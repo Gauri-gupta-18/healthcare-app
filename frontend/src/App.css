@@ -1,0 +1,406 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap');
+
+:root {
+  /* HSL Color Palette */
+  --teal-primary: hsl(180, 100%, 25%); /* #008080 */
+  --teal-light: hsl(180, 50%, 95%);
+  --teal-dark: hsl(180, 100%, 15%);
+  --teal-hover: hsl(180, 100%, 30%);
+  --teal-gradient: linear-gradient(135deg, hsl(180, 100%, 25%) 0%, hsl(175, 80%, 35%) 100%);
+  
+  --white: #ffffff;
+  --bg-color: #f4f7f8;
+  
+  --text-dark: hsl(220, 30%, 15%);
+  --text-muted: hsl(220, 10%, 45%);
+  
+  --border-color: hsl(220, 20%, 90%);
+  
+  /* Layout & Spacing */
+  --border-radius: 12px;
+  --border-radius-lg: 20px;
+  --box-shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  --box-shadow-hover: 0 20px 30px -10px rgba(0, 128, 128, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-dark);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-dark);
+  margin-top: 0;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Glassy Navigation Bar */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 16px 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--teal-gradient);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  font-family: 'Outfit', sans-serif;
+}
+
+header h1 {
+  margin: 0;
+  color: var(--text-dark);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+nav a:hover {
+  color: var(--teal-primary);
+}
+
+/* Buttons */
+button {
+  background: var(--teal-gradient);
+  color: var(--white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 128, 128, 0.25);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button.outline {
+  background: transparent;
+  color: var(--teal-primary);
+  border: 1.5px solid var(--teal-primary);
+}
+
+button.outline:hover {
+  background: var(--teal-light);
+  box-shadow: none;
+}
+
+button.small {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+/* Hero Section */
+.hero {
+  background: linear-gradient(to bottom, #fff, var(--bg-color));
+  padding: 80px 5% 60px;
+  text-align: center;
+}
+
+.hero h2 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+
+.hero p {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 40px;
+}
+
+/* Main Content Area */
+.main-content {
+  padding: 40px 5%;
+  flex-grow: 1;
+}
+
+/* Search Bar (Floating) */
+.search-bar-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 10px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow);
+  display: flex;
+  gap: 10px;
+  border: 1px solid var(--border-color);
+  transform: translateY(-50%);
+}
+
+.search-input-wrapper {
+  flex-grow: 1;
+  position: relative;
+}
+
+.search-input-wrapper input {
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  outline: none;
+}
+
+.search-bar-container button {
+  padding: 14px 30px;
+  border-radius: 12px;
+}
+
+/* Cards & Layout */
+.portal-card {
+  background: var(--white);
+  padding: 40px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow);
+  margin: 0 auto 40px;
+  max-width: 1200px;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+/* Speciality Cards */
+.speciality-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  text-align: center;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.speciality-card:hover {
+  border-color: var(--teal-primary);
+  box-shadow: var(--box-shadow-hover);
+  transform: translateY(-5px);
+}
+
+.speciality-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--teal-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  font-size: 1.8rem;
+  color: var(--teal-primary);
+}
+
+.speciality-card h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Doctor Profile Cards */
+.doctor-card {
+  background: white;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  padding: 20px;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.doctor-card:hover {
+  box-shadow: var(--box-shadow-hover);
+  border-color: var(--teal-primary);
+}
+
+.doctor-header {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.doctor-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 12px;
+  background: var(--teal-light);
+  color: var(--teal-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: 'Outfit';
+}
+
+.doctor-info h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.2rem;
+}
+
+.tag {
+  display: inline-block;
+  background: var(--teal-light);
+  color: var(--teal-dark);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.doctor-stats {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Appointments & Admin Cards */
+.appointment-card {
+  background: white;
+  border-left: 4px solid var(--teal-primary);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: var(--box-shadow-sm);
+  margin-bottom: 15px;
+}
+
+/* Forms */
+form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  background: var(--bg-color);
+  transition: var(--transition);
+  box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--teal-primary);
+  background: white;
+  box-shadow: 0 0 0 4px var(--teal-light);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 30px;
+  border-radius: var(--border-radius-lg);
+  width: 100%;
+  max-width: 500px;
+  box-shadow: var(--box-shadow);
+}
