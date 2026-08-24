@@ -23,11 +23,27 @@ async function initializeDatabase() {
       // Admin
       await db.query(`INSERT INTO users (name, email, password_hash, role) VALUES ('System Admin', 'admin@healthcare.com', $1, 'admin')`, [hash]);
       
-      // Doctor
-      const doc = await db.query(`INSERT INTO users (name, email, password_hash, role) VALUES ('Sarah Jenkins', 'doctor@healthcare.com', $1, 'doctor') RETURNING id`, [hash]);
-      await db.query(`INSERT INTO doctor_profiles (user_id, specialisation, slot_duration_minutes) VALUES ($1, 'Cardiologist', 30)`, [doc.rows[0].id]);
+      // Doctors
+      const doc1 = await db.query(`INSERT INTO users (name, email, password_hash, role) VALUES ('Sarah Jenkins', 'cardiologist@healthcare.com', $1, 'doctor') RETURNING id`, [hash]);
+      await db.query(`INSERT INTO doctor_profiles (user_id, specialisation, slot_duration_minutes) VALUES ($1, 'Cardiologist', 30)`, [doc1.rows[0].id]);
       
       console.log('Seed data inserted.');
+    }
+
+    // Backfill missing specialisations (Pediatrician, Dermatologist, Neurologist)
+    const specsToBackfill = ['Pediatrician', 'Dermatologist', 'Neurologist'];
+    for (const spec of specsToBackfill) {
+      const { rows } = await db.query('SELECT id FROM doctor_profiles WHERE specialisation = $1', [spec]);
+      if (rows.length === 0) {
+        console.log(\`Backfilling missing \${spec}...\`);
+        const bcrypt = require('bcrypt');
+        const hash = await bcrypt.hash('password123', 10);
+        const name = \`Dr. \${spec} Test\`;
+        const email = \`\${spec.toLowerCase()}@healthcare.com\`;
+        
+        const doc = await db.query(\`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, 'doctor') RETURNING id\`, [name, email, hash]);
+        await db.query(\`INSERT INTO doctor_profiles (user_id, specialisation, slot_duration_minutes) VALUES ($1, $2, 30)\`, [doc.rows[0].id, spec]);
+      }
     }
 
     // Backfill working hours for any doctor who doesn't have them
