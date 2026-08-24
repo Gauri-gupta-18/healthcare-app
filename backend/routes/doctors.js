@@ -6,7 +6,7 @@ const router = express.Router();
 
 // GET /api/doctors
 // Optional query: ?specialisation=Cardiologist
-router.get('/', authenticate, async (req, res) => {
+router.get('/', async (req, res) => {
   const { specialisation } = req.query;
 
   try {
