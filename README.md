@@ -1,67 +1,161 @@
-# 🏥 Healthcare Appointment & Follow-up Manager
+# Healthcare Appointment & AI Summary System
 
-![React](https://img.shields.io/badge/React-18-blue)
-![Node.js](https://img.shields.io/badge/Node.js-18+-green)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)
+## 🚀 Live Demo
+**Frontend & Backend Hosted On Railway:** [https://healthcare-app-production-3d2e.up.railway.app](https://healthcare-app-production-3d2e.up.railway.app)
 
-A modern, full-stack web application designed to streamline patient-doctor interactions. It allows patients to seamlessly book appointments and provide symptoms, while empowering doctors with AI-generated pre-visit summaries and automated post-visit follow-ups.
+---
 
-## ✨ Key Features
+## 🛠️ System Setup Guide
 
-- **🧑‍⚕️ Role-Based Access**: Dedicated portals for Patients, Doctors, and Administrators.
-- **📅 Smart Booking System**: Robust appointment scheduling with database-level concurrency control to strictly prevent double-bookings.
-- **🧠 AI Integrations (Powered by Google Gemini)**:
-  - *Pre-Visit*: Automatically analyzes patient symptoms to provide doctors with an urgency assessment and suggested questions.
-  - *Post-Visit*: Generates patient-friendly visit summaries, medication schedules, and follow-up steps from raw clinical notes.
-- **📧 Automated Notifications**: Asynchronous background worker handles email dispatch for confirmations, cancellations, and daily medication reminders.
-- **🗓️ Google Calendar Sync**: Automatically pushes appointments to Google Calendar.
-- **🛡️ Secure & Reliable**: Built with JWT authentication and strict transactional safety.
+### 1. Prerequisites
+- **Node.js**: v18 or later
+- **PostgreSQL**: v13 or later
 
-## 🛠️ Technology Stack
+### 2. Installation
+Clone the repository and install dependencies for both the frontend and backend:
 
-- **Frontend**: React 18, Vite, Vanilla CSS (Premium Teal/White Aesthetics)
-- **Backend**: Node.js, Express.js 4
-- **Database**: PostgreSQL 15
-- **AI/LLM**: Google Gemini 1.5 Flash API
-- **Email Service**: Nodemailer / SMTP
-- **Job Queue**: Native PostgreSQL Polling (`worker.js`)
-
-## 🚀 Getting Started Locally
-
-### Prerequisites
-- Node.js (v18+)
-- PostgreSQL (v15+)
-
-### 1. Database Setup
-Ensure PostgreSQL is running on port `5432` with a database named `healthcare` (or use the provided `docker-compose.yml` to spin it up).
-
-### 2. Backend Setup
 ```bash
+git clone <your-repo-url>
+cd Healthcare
+
+# Install backend dependencies
 cd backend
 npm install
-# Copy the example environment file and update the variables
-cp .env.example .env
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+```
+
+### 3. Environment Variables
+Create a `.env` file in the `backend` directory based on the `.env.example`:
+```ini
+DATABASE_URL=postgres://postgres:password@localhost:5432/healthcare
+JWT_SECRET=your_jwt_secret
+PORT=5000
+FRONTEND_URL=http://localhost:5173
+GEMINI_API_KEY=your_google_gemini_api_key
+```
+
+Create a `.env` file in the `frontend` directory based on the `.env.example`:
+```ini
+VITE_API_URL=http://localhost:5000/api
+```
+
+### 4. Running the Application Locally
+**Start the Backend (and initialize the DB automatically):**
+```bash
+cd backend
 npm start
 ```
-*Note: The backend will automatically initialize the database schema on first startup.*
+*Note: `npm start` automatically runs `node init-db.js` before starting the server. This guarantees the schema exists, seeds default Admin/Doctor accounts, and resets doctor passwords to `password123` to prevent lockout.*
 
-### 3. Frontend Setup
-In a new terminal window:
+**Start the Frontend:**
 ```bash
 cd frontend
-npm install
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`.
+---
 
-## 📚 Documentation Directory
+## 📚 API Documentation
 
-For deep technical dives, architecture details, and deployment guides, please refer to the following internal documentation:
+### **Auth Routes** (`/api/auth`)
+- `POST /register`: Register a new patient (Body: `name`, `email`, `password`)
+- `POST /login`: Log in as any user (Body: `email`, `password`)
+- `GET /me`: Get current logged-in profile
 
-- 📖 **[Project Handoff & Architecture](./PROJECT_HANDOFF.md)** *(Start Here)*
-- 🔌 **[API Documentation](./API.md)**
-- 🗄️ **[Database Schema](./DB_SCHEMA.md)**
-- 🏗️ **[System Design](./SYSTEM_DESIGN.md)**
-- ☁️ **[Deployment Guide](./DEPLOYMENT.md)**
-- 🤖 **[LLM Prompts](./LLM_PROMPTS.md)**
+### **Doctor Routes** (`/api/doctors`)
+- `GET /`: Get all registered doctors (Public)
+- `GET /:id/slots?date=YYYY-MM-DD`: Get available time slots for a doctor
+
+### **Appointment Routes** (`/api/appointments`)
+- `POST /`: Book an appointment (Body: `doctor_id`, `appointment_date`, `start_time`, `symptoms`)
+- `POST /:id/cancel`: Cancel an appointment
+- `PUT /:id/reschedule`: Reschedule an appointment (Body: `new_date`, `new_start_time`)
+
+### **Provider/Doctor Routes** (`/api/doctor`)
+- `GET /appointments`: Get all appointments for the logged-in doctor
+- `PUT /appointments/:id/notes`: Add clinical notes & prescription, triggers Post-Visit AI summary
+
+### **Admin Routes** (`/api/admin`)
+- `POST /doctors`: Create a new doctor
+- `POST /doctors/:id/leave-days`: Add a leave day and cancel overlapping appointments
+
+---
+
+## 🗄️ Database Schema
+
+The PostgreSQL database uses the following core tables:
+
+1. **`users`**: Stores all accounts (patients, doctors, admins).
+   - Columns: `id`, `name`, `email`, `password_hash`, `role`, `created_at`
+2. **`doctor_profiles`**: Doctor-specific settings.
+   - Columns: `id`, `user_id`, `specialisation`, `slot_duration_minutes`
+3. **`working_hours`**: Weekly schedules for doctors.
+   - Columns: `id`, `doctor_id`, `day_of_week`, `start_time`, `end_time`
+4. **`leave_days`**: Specific dates a doctor is unavailable.
+   - Columns: `id`, `doctor_id`, `leave_date`
+5. **`appointments`**: Core booking logic and LLM outputs.
+   - Columns: `id`, `patient_id`, `doctor_id`, `appointment_date`, `start_time`, `end_time`, `status`
+   - AI Columns: `symptoms`, `urgency`, `chief_complaint`, `suggested_questions`, `clinical_notes`, `prescription`, `patient_summary`, `medication_schedule`, `follow_up_steps`
+
+---
+
+## 🤖 LLM Prompts (Google Gemini)
+
+The system integrates Google Gemini AI using the `@google/generative-ai` SDK (`gemini-3.5-flash` model).
+
+### **Pre-Visit Summary Prompt**
+Executed when a patient books an appointment:
+\`\`\`text
+You are a medical AI assistant. Based on the following patient symptoms, generate a JSON response with:
+1. urgency (Low, Medium, High)
+2. chief_complaint (A brief summary of the main issue)
+3. suggested_questions (An array of 3 specific questions for the doctor to ask the patient)
+
+Symptoms: "{patient_symptoms}"
+
+Return ONLY valid JSON in this exact structure:
+{
+  "urgency": "Medium",
+  "chief_complaint": "Description",
+  "suggested_questions": ["Q1", "Q2", "Q3"]
+}
+\`\`\`
+
+### **Post-Visit Summary Prompt**
+Executed when a doctor finalizes clinical notes:
+\`\`\`text
+You are a medical AI assistant. Based on the doctor's clinical notes and prescription, generate a patient-friendly summary in JSON format with:
+1. explanation (A simple explanation of the consultation and diagnosis)
+2. medication_schedule (An array of objects with 'medication', 'dosage', 'timing')
+3. follow_up_steps (An array of strings detailing next steps or lifestyle advice)
+
+Clinical Notes: "{doctor_notes}"
+Prescription: "{doctor_prescription}"
+
+Return ONLY valid JSON in this exact structure:
+{
+  "explanation": "Simple text...",
+  "medication_schedule": [{"medication": "Drug", "dosage": "Amount", "timing": "When to take"}],
+  "follow_up_steps": ["Step 1", "Step 2"]
+}
+\`\`\`
+
+---
+
+## 📅 Google Calendar Setup Steps
+
+To integrate Google Calendar (if expanded in the future):
+1. Go to the **Google Cloud Console**.
+2. Create a new Project and enable the **Google Calendar API**.
+3. Create **OAuth 2.0 Client IDs** (Web Application) and add your redirect URIs.
+4. Download the `credentials.json` file.
+5. In your Node application, use the `googleapis` package:
+   ```javascript
+   const { google } = require('googleapis');
+   const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+   // Generate Auth URL -> Get Token -> google.calendar({ version: 'v3', auth: oauth2Client });
+   ```
+6. Add the OAuth flow to the `/api/auth` router so Doctors can grant calendar access.
