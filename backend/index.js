@@ -25,6 +25,19 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/doctors', doctorsRoutes);
 
+app.get('/api/test-llm', async (req, res) => {
+  try {
+    const { generatePreVisitSummary } = require('./services/llm');
+    const result = await generatePreVisitSummary("I have a headache and a slight fever.");
+    res.json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message, 
+      stack: error.stack 
+    });
+  }
+});
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
