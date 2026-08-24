@@ -10,6 +10,13 @@ export default function PatientPortal({ auth, setAuth }) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [name, setName] = useState('');
   
+  // Booking State
+  const [showBooking, setShowBooking] = useState(null); // stores doctor object
+  const [bookingDate, setBookingDate] = useState('');
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState('');
+  const [symptoms, setSymptoms] = useState('');
+  
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
@@ -30,6 +37,36 @@ export default function PatientPortal({ auth, setAuth }) {
       setShowLogin(false);
     } catch (err) {
       alert(isRegistering ? 'Registration failed' : 'Login failed');
+    }
+  };
+
+  useEffect(() => {
+    if (showBooking && bookingDate) {
+      axios.get(`${API_URL}/appointments/doctors/${showBooking.doctor_id}/slots?date=${bookingDate}`)
+        .then(res => setAvailableSlots(res.data.slots))
+        .catch(console.error);
+    }
+  }, [bookingDate, showBooking]);
+
+  const submitBooking = async (e) => {
+    e.preventDefault();
+    if (!selectedSlot) return alert('Please select a time slot.');
+    
+    try {
+      await axios.post(`${API_URL}/appointments`, {
+        doctor_id: showBooking.doctor_id,
+        appointment_date: bookingDate,
+        start_time: selectedSlot,
+        symptoms
+      }, { headers: { Authorization: `Bearer ${auth.token}` } });
+      
+      alert('Appointment booked! The AI is generating your pre-visit summary for the doctor.');
+      setShowBooking(null);
+      setBookingDate('');
+      setSymptoms('');
+      setSelectedSlot('');
+    } catch(err) {
+      alert(err.response?.data?.error || 'Booking failed');
     }
   };
 
@@ -117,6 +154,59 @@ export default function PatientPortal({ auth, setAuth }) {
         </div>
       )}
 
+      {showBooking && (
+        <div className="modal-overlay" onClick={() => setShowBooking(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2 style={{ marginBottom: '20px' }}>Book Appointment with Dr. {showBooking.name}</h2>
+            <form onSubmit={submitBooking}>
+              <div className="form-group">
+                <label>Select Date</label>
+                <input type="date" value={bookingDate} min={new Date().toISOString().split('T')[0]} onChange={e => setBookingDate(e.target.value)} required />
+              </div>
+              
+              {bookingDate && (
+                <div className="form-group">
+                  <label>Available Slots</label>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '10px' }}>
+                    {availableSlots.length === 0 ? (
+                      <p style={{ color: 'red' }}>No slots available on this date.</p>
+                    ) : (
+                      availableSlots.map(slot => (
+                        <div 
+                          key={slot} 
+                          onClick={() => setSelectedSlot(slot)}
+                          style={{ 
+                            padding: '8px 12px', 
+                            border: selectedSlot === slot ? '2px solid var(--primary-color)' : '1px solid #ddd',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            background: selectedSlot === slot ? 'var(--teal-light)' : 'white'
+                          }}
+                        >
+                          {slot}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="form-group">
+                <label>What are your symptoms?</label>
+                <textarea 
+                  rows="4" 
+                  placeholder="Please describe your symptoms so our AI can prepare a pre-visit summary for the doctor..."
+                  value={symptoms} 
+                  onChange={e => setSymptoms(e.target.value)} 
+                  required 
+                />
+              </div>
+              <button type="submit" style={{ width: '100%' }}>Confirm Booking</button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <h3 className="section-title">Popular Specialities</h3>
         <div className="grid-4" style={{ marginBottom: '60px' }}>
@@ -150,7 +240,7 @@ export default function PatientPortal({ auth, setAuth }) {
                   style={{ width: '100%', marginTop: 'auto' }} 
                   onClick={() => {
                     if (!auth) setShowLogin(true);
-                    else alert('Booking flow goes here!');
+                    else setShowBooking(doc);
                   }}
                 >
                   Book Appointment
