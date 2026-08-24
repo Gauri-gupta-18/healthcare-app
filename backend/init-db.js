@@ -35,14 +35,25 @@ async function initializeDatabase() {
     for (const spec of specsToBackfill) {
       const { rows } = await db.query('SELECT id FROM doctor_profiles WHERE specialisation = $1', [spec]);
       if (rows.length === 0) {
-        console.log(`Backfilling missing ${spec}...`);
-        const bcrypt = require('bcrypt');
-        const hash = await bcrypt.hash('password123', 10);
-        const name = `Dr. ${spec} Test`;
-        const email = `${spec.toLowerCase()}@healthcare.com`;
-        
-        const doc = await db.query(`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, 'doctor') RETURNING id`, [name, email, hash]);
-        await db.query(`INSERT INTO doctor_profiles (user_id, specialisation, slot_duration_minutes) VALUES ($1, $2, 30)`, [doc.rows[0].id, spec]);
+        try {
+          console.log(`Backfilling missing ${spec}...`);
+          const bcrypt = require('bcrypt');
+          const hash = await bcrypt.hash('password123', 10);
+          const name = `Dr. ${spec} Test`;
+          const email = `${spec.toLowerCase()}@healthcare.com`;
+          
+          let userId;
+          const userRes = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+          if (userRes.rows.length > 0) {
+            userId = userRes.rows[0].id;
+          } else {
+            const doc = await db.query(`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, 'doctor') RETURNING id`, [name, email, hash]);
+            userId = doc.rows[0].id;
+          }
+          await db.query(`INSERT INTO doctor_profiles (user_id, specialisation, slot_duration_minutes) VALUES ($1, $2, 30) ON CONFLICT DO NOTHING`, [userId, spec]);
+        } catch (e) {
+          console.error(`Failed to backfill ${spec}:`, e);
+        }
       }
     }
 
