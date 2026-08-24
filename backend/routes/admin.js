@@ -34,6 +34,14 @@ router.post('/doctors', async (req, res) => {
       [newUser.rows[0].id, specialisation, slot_duration_minutes || 30]
     );
 
+    // Provide default working hours (Mon-Fri, 9am - 5pm)
+    for (let day = 1; day <= 5; day++) {
+      await db.query(
+        'INSERT INTO working_hours (doctor_id, day_of_week, start_time, end_time) VALUES ($1, $2, $3, $4)',
+        [doctorProfile.rows[0].id, day, '09:00:00', '17:00:00']
+      );
+    }
+
     await db.query('COMMIT');
 
     res.status(201).json({

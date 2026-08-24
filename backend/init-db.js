@@ -30,6 +30,26 @@ async function initializeDatabase() {
       console.log('Seed data inserted.');
     }
 
+    // Backfill working hours for any doctor who doesn't have them
+    const docsWithoutHours = await db.query(`
+      SELECT dp.id FROM doctor_profiles dp
+      LEFT JOIN working_hours wh ON dp.id = wh.doctor_id
+      WHERE wh.id IS NULL
+    `);
+    
+    if (docsWithoutHours.rows.length > 0) {
+      console.log(\`Backfilling working hours for \${docsWithoutHours.rows.length} doctor(s)...\`);
+      for (const doc of docsWithoutHours.rows) {
+        // Add Mon-Fri (1-5) 9am to 5pm
+        for (let day = 1; day <= 5; day++) {
+          await db.query(
+            'INSERT INTO working_hours (doctor_id, day_of_week, start_time, end_time) VALUES ($1, $2, $3, $4)',
+            [doc.id, day, '09:00:00', '17:00:00']
+          );
+        }
+      }
+    }
+
     console.log('Database schema successfully initialized/verified.');
   } catch (error) {
     console.error('Failed to initialize database schema:', error);
