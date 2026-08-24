@@ -38,7 +38,7 @@ async function initializeDatabase() {
     `);
     
     if (docsWithoutHours.rows.length > 0) {
-      console.log(\`Backfilling working hours for \${docsWithoutHours.rows.length} doctor(s)...\`);
+      console.log(`Backfilling working hours for ${docsWithoutHours.rows.length} doctor(s)...`);
       for (const doc of docsWithoutHours.rows) {
         // Add Mon-Fri (1-5) 9am to 5pm
         for (let day = 1; day <= 5; day++) {
