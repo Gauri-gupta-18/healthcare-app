@@ -35,14 +35,14 @@ async function initializeDatabase() {
     for (const spec of specsToBackfill) {
       const { rows } = await db.query('SELECT id FROM doctor_profiles WHERE specialisation = $1', [spec]);
       if (rows.length === 0) {
-        console.log(\`Backfilling missing \${spec}...\`);
+        console.log(`Backfilling missing ${spec}...`);
         const bcrypt = require('bcrypt');
         const hash = await bcrypt.hash('password123', 10);
-        const name = \`Dr. \${spec} Test\`;
-        const email = \`\${spec.toLowerCase()}@healthcare.com\`;
+        const name = `Dr. ${spec} Test`;
+        const email = `${spec.toLowerCase()}@healthcare.com`;
         
-        const doc = await db.query(\`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, 'doctor') RETURNING id\`, [name, email, hash]);
-        await db.query(\`INSERT INTO doctor_profiles (user_id, specialisation, slot_duration_minutes) VALUES ($1, $2, 30)\`, [doc.rows[0].id, spec]);
+        const doc = await db.query(`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, 'doctor') RETURNING id`, [name, email, hash]);
+        await db.query(`INSERT INTO doctor_profiles (user_id, specialisation, slot_duration_minutes) VALUES ($1, $2, 30)`, [doc.rows[0].id, spec]);
       }
     }
 
