@@ -108,11 +108,16 @@ router.post('/', authenticate, async (req, res) => {
 
     // 3. Process LLM in background (DO NOT BLOCK THE BOOKING or fail it if LLM fails)
     generatePreVisitSummary(symptoms).then(async (summary) => {
+      // Robust key extraction to handle any LLM capitalization quirks
+      const urgency = summary.urgency || summary.Urgency || 'Unknown';
+      const chiefComplaint = summary.chief_complaint || summary.Chief_complaint || summary.ChiefComplaint || summary.chiefComplaint || 'Not specified';
+      const questions = summary.suggested_questions || summary.Suggested_questions || summary.SuggestedQuestions || summary.suggestedQuestions || [];
+      
       await db.query(
         `UPDATE appointments 
          SET urgency = $1, chief_complaint = $2, suggested_questions = $3 
          WHERE id = $4`,
-        [summary.urgency, summary.chief_complaint, JSON.stringify(summary.suggested_questions), appointment.id]
+        [urgency, chiefComplaint, JSON.stringify(questions), appointment.id]
       );
     }).catch(async (err) => {
       console.error('LLM Failed during booking for appt:', appointment.id);
