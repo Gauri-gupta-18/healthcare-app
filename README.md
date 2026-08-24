@@ -1,8 +1,7 @@
 # Healthcare Appointment & AI Summary System
 
 ## 🚀 Live Demo
-**Live Application (Frontend):** [https://spectacular-compassion-production-9572.up.railway.app](https://spectacular-compassion-production-9572.up.railway.app)
-**Backend API Base URL:** [https://healthcare-app-production-3d2e.up.railway.app](https://healthcare-app-production-3d2e.up.railway.app)
+**Live Application (Patient & Doctor Portals):** [https://spectacular-compassion-production-9572.up.railway.app](https://spectacular-compassion-production-9572.up.railway.app)
 
 ---
 
