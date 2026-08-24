@@ -4,7 +4,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'dummy_key');
 
 async function generatePreVisitSummary(symptoms) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
     const prompt = `
       You are a medical AI assistant. Based on the following patient symptoms, generate a JSON response with:
       1. urgency (Low, Medium, High)
@@ -27,8 +27,9 @@ async function generatePreVisitSummary(symptoms) {
     
     // Strip markdown formatting if any
     let jsonStr = text;
-    if (jsonStr.startsWith('\`\`\`json')) {
-      jsonStr = jsonStr.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+    if (jsonStr.includes('```')) {
+      const match = jsonStr.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (match) jsonStr = match[1].trim();
     }
     
     return JSON.parse(jsonStr);
@@ -40,7 +41,7 @@ async function generatePreVisitSummary(symptoms) {
 
 async function generatePostVisitSummary(clinicalNotes, prescription) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
     const prompt = `
       You are a medical AI assistant. Based on the doctor's clinical notes and prescription, generate a patient-friendly summary in JSON format with:
       1. explanation (A simple explanation of the consultation and diagnosis)
@@ -63,8 +64,9 @@ async function generatePostVisitSummary(clinicalNotes, prescription) {
     const text = response.text().trim();
     
     let jsonStr = text;
-    if (jsonStr.startsWith('\`\`\`json')) {
-      jsonStr = jsonStr.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+    if (jsonStr.includes('```')) {
+      const match = jsonStr.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (match) jsonStr = match[1].trim();
     }
     
     return JSON.parse(jsonStr);
