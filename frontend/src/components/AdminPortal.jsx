@@ -29,7 +29,14 @@ export default function AdminPortal({ auth, setAuth }) {
   };
 
   const fetchDoctors = () => {
-    axios.get(`${API_URL}/doctors`).then(res => setDoctors(res.data)).catch(console.error);
+    axios.get(`${API_URL}/doctors`)
+      .then(res => {
+        if (!res.data || res.data.length === 0) {
+          alert("DIAGNOSTIC WARNING: The backend database returned 0 doctors. The database is empty.");
+        }
+        setDoctors(res.data);
+      })
+      .catch(err => alert("DIAGNOSTIC ERROR: Failed to fetch doctors. " + err.message));
   };
 
   useEffect(() => {

@@ -50,7 +50,10 @@ async function initializeDatabase() {
             const doc = await db.query(`INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, 'doctor') RETURNING id`, [name, email, hash]);
             userId = doc.rows[0].id;
           }
-          await db.query(`INSERT INTO doctor_profiles (user_id, specialisation, slot_duration_minutes) VALUES ($1, $2, 30) ON CONFLICT DO NOTHING`, [userId, spec]);
+          const docRes = await db.query('SELECT id FROM doctor_profiles WHERE user_id = $1', [userId]);
+          if (docRes.rows.length === 0) {
+            await db.query(`INSERT INTO doctor_profiles (user_id, specialisation, slot_duration_minutes) VALUES ($1, $2, 30)`, [userId, spec]);
+          }
         } catch (e) {
           console.error(`Failed to backfill ${spec}:`, e);
         }
