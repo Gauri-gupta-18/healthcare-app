@@ -25,29 +25,16 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/doctors', doctorsRoutes);
 
-app.get('/api/test-llm', (req, res) => {
-  const https = require('https');
-  const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`;
-  
-  https.get(url, (resp) => {
-    let data = '';
-    resp.on('data', (chunk) => data += chunk);
-    resp.on('end', () => {
-      try {
-        const parsed = JSON.parse(data);
-        res.json({
-          success: true,
-          message: "Here are the AI models your API key has permission to use:",
-          models: parsed.models ? parsed.models.map(m => m.name) : parsed
-        });
-      } catch (e) {
-        res.json({ success: false, raw: data });
-      }
-    });
-  }).on("error", (err) => {
-    res.status(500).json({ success: false, error: err.message });
-  });
+app.get('/api/test-llm', async (req, res) => {
+  try {
+    const { generatePreVisitSummary } = require('./services/llm');
+    const result = await generatePreVisitSummary("continous pain in foot");
+    res.json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message, stack: error.stack });
+  }
 });
+
 app.get('/api/test-db', async (req, res) => {
   const db = require('./db');
   try {
