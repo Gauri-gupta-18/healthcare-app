@@ -30,8 +30,8 @@ async function initializeDatabase() {
       console.log('Seed data inserted.');
     }
 
-    // Backfill missing specialisations (Pediatrician, Dermatologist, Neurologist)
-    const specsToBackfill = ['Pediatrician', 'Dermatologist', 'Neurologist'];
+    // Backfill ALL required specialisations
+    const specsToBackfill = ['Cardiologist', 'Pediatrician', 'Dermatologist', 'Neurologist'];
     for (const spec of specsToBackfill) {
       const { rows } = await db.query('SELECT id FROM doctor_profiles WHERE specialisation = $1', [spec]);
       if (rows.length === 0) {
