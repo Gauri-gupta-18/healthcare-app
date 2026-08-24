@@ -4,7 +4,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'dummy_key');
 
 async function generatePreVisitSummary(symptoms) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
     const prompt = `
       You are a medical AI assistant. Based on the following patient symptoms, generate a JSON response with:
       1. urgency (Low, Medium, High)
@@ -41,7 +41,7 @@ async function generatePreVisitSummary(symptoms) {
 
 async function generatePostVisitSummary(clinicalNotes, prescription) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
     const prompt = `
       You are a medical AI assistant. Based on the doctor's clinical notes and prescription, generate a patient-friendly summary in JSON format with:
       1. explanation (A simple explanation of the consultation and diagnosis)
