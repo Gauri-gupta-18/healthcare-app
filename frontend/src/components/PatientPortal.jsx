@@ -7,6 +7,8 @@ export default function PatientPortal({ auth, setAuth }) {
   const [doctors, setDoctors] = useState([]);
   const [specialisation, setSpecialisation] = useState('');
   const [showLogin, setShowLogin] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [name, setName] = useState('');
   
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -18,11 +20,16 @@ export default function PatientPortal({ auth, setAuth }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_URL}/auth/login`, { email, password });
-      setAuth(res.data);
+      if (isRegistering) {
+        const res = await axios.post(`${API_URL}/auth/register`, { name, email, password });
+        setAuth(res.data);
+      } else {
+        const res = await axios.post(`${API_URL}/auth/login`, { email, password });
+        setAuth(res.data);
+      }
       setShowLogin(false);
     } catch (err) {
-      alert('Login failed');
+      alert(isRegistering ? 'Registration failed' : 'Login failed');
     }
   };
 
@@ -72,8 +79,14 @@ export default function PatientPortal({ auth, setAuth }) {
       {showLogin && (
         <div className="modal-overlay" onClick={() => setShowLogin(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2 style={{ marginBottom: '20px' }}>Patient Login</h2>
+            <h2 style={{ marginBottom: '20px' }}>{isRegistering ? 'Create Account' : 'Patient Login'}</h2>
             <form onSubmit={handleLogin}>
+              {isRegistering && (
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input type="text" value={name} onChange={e => setName(e.target.value)} required />
+                </div>
+              )}
               <div className="form-group">
                 <label>Email Address</label>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
@@ -82,7 +95,14 @@ export default function PatientPortal({ auth, setAuth }) {
                 <label>Password</label>
                 <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
               </div>
-              <button type="submit" style={{ width: '100%' }}>Login Securely</button>
+              <button type="submit" style={{ width: '100%', marginBottom: '10px' }}>
+                {isRegistering ? 'Register & Login' : 'Login Securely'}
+              </button>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ color: 'var(--primary-color)', cursor: 'pointer', fontSize: '0.9rem' }} onClick={() => setIsRegistering(!isRegistering)}>
+                  {isRegistering ? 'Already have an account? Login' : 'New patient? Create Account'}
+                </span>
+              </div>
             </form>
           </div>
         </div>
