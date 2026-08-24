@@ -1,7 +1,8 @@
 # Healthcare Appointment & AI Summary System
 
 ## 🚀 Live Demo
-**Frontend & Backend Hosted On Railway:** [https://healthcare-app-production-3d2e.up.railway.app](https://healthcare-app-production-3d2e.up.railway.app)
+**Live Application (Frontend):** [https://spectacular-compassion-production-9572.up.railway.app](https://spectacular-compassion-production-9572.up.railway.app)
+**Backend API Base URL:** [https://healthcare-app-production-3d2e.up.railway.app](https://healthcare-app-production-3d2e.up.railway.app)
 
 ---
 
