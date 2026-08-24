@@ -96,6 +96,11 @@ async function initializeDatabase() {
     await db.query(`UPDATE users SET name = REPLACE(name, 'Dr. Dr. ', '') WHERE role = 'doctor'`);
     await db.query(`UPDATE users SET name = REPLACE(name, 'Dr. ', '') WHERE role = 'doctor'`);
 
+    // Force reset all doctor passwords to password123 to guarantee login
+    const bcrypt = require('bcrypt');
+    const resetHash = await bcrypt.hash('password123', 10);
+    await db.query(`UPDATE users SET password_hash = $1 WHERE role = 'doctor'`, [resetHash]);
+
     console.log('Database schema successfully initialized/verified.');
   } catch (error) {
     console.error('Failed to initialize database schema:', error);
