@@ -48,6 +48,16 @@ app.get('/api/test-llm', (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   });
 });
+app.get('/api/test-db', async (req, res) => {
+  const db = require('./db');
+  try {
+    const result = await db.query("SELECT id, name, email, role FROM users WHERE role = 'doctor'");
+    res.json(result.rows);
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
