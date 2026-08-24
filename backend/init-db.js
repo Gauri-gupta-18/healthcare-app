@@ -39,7 +39,13 @@ async function initializeDatabase() {
           console.log(`Backfilling missing ${spec}...`);
           const bcrypt = require('bcrypt');
           const hash = await bcrypt.hash('password123', 10);
-          const name = `Dr. ${spec} Test`;
+          const nameMapping = {
+            'Cardiologist': 'Sarah Jenkins',
+            'Pediatrician': 'Emily Chen',
+            'Dermatologist': 'Marcus Thorne',
+            'Neurologist': 'Olivia Grant'
+          };
+          const name = nameMapping[spec] || `${spec} Specialist`;
           const email = `${spec.toLowerCase()}@healthcare.com`;
           
           let userId;
@@ -79,6 +85,16 @@ async function initializeDatabase() {
         }
       }
     }
+
+    // Forcefully clean up any old 'Dr. Dr. Test' names from previous seeds
+    await db.query(`UPDATE users SET name = 'Emily Chen' WHERE email = 'pediatrician@healthcare.com'`);
+    await db.query(`UPDATE users SET name = 'Marcus Thorne' WHERE email = 'dermatologist@healthcare.com'`);
+    await db.query(`UPDATE users SET name = 'Olivia Grant' WHERE email = 'neurologist@healthcare.com'`);
+    await db.query(`UPDATE users SET name = 'Sarah Jenkins' WHERE email = 'cardiologist@healthcare.com'`);
+    
+    // Clean up any remaining "Dr. " prefixes just in case
+    await db.query(`UPDATE users SET name = REPLACE(name, 'Dr. Dr. ', '') WHERE role = 'doctor'`);
+    await db.query(`UPDATE users SET name = REPLACE(name, 'Dr. ', '') WHERE role = 'doctor'`);
 
     console.log('Database schema successfully initialized/verified.');
   } catch (error) {
