@@ -61,6 +61,15 @@ export default function PatientPortal({ auth, setAuth }) {
       <div className="hero">
         <h2>Book Appointments with Top Doctors Instantly</h2>
         <p>Access verified physicians, specialist care, and effortless scheduling near you.</p>
+        {!auth && (
+          <button 
+            className="outline" 
+            style={{ marginTop: '20px', background: 'white', color: 'var(--primary-color)' }}
+            onClick={() => setShowLogin(true)}
+          >
+            Login or Register Account
+          </button>
+        )}
       </div>
 
       <div className="search-bar-container">
