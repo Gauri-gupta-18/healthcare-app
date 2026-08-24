@@ -27,9 +27,16 @@ app.use('/api/doctors', doctorsRoutes);
 
 app.get('/api/test-llm', async (req, res) => {
   try {
-    const { generatePreVisitSummary } = require('./services/llm');
-    const result = await generatePreVisitSummary("I have a headache and a slight fever.");
-    res.json({ success: true, result });
+    // 1. Fetch available models for this specific API key
+    const fetch = require('node-fetch') || global.fetch; // Use built-in fetch
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
+    const data = await response.json();
+    
+    res.json({ 
+      success: true, 
+      message: "Here are the AI models your API key has permission to use:", 
+      models: data.models ? data.models.map(m => m.name) : data 
+    });
   } catch (error) {
     res.status(500).json({ 
       success: false, 
